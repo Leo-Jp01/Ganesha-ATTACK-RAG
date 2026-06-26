@@ -88,27 +88,31 @@ def generar_ticket_mitre(pregunta_usuario):
     contexto = "\n\n".join([d.page_content for d in docs])
     
     # Construir el prompt para un modelo de Chat
-    prompt_final = f"""
-Eres un experto analista de ciberseguridad del SOC.
-Tu tarea es redactar un ticket de incidente profesional basado en la información de MITRE proporcionada.
-
+    prompt_final = f"""<|system|>
+Eres un experto analista de ciberseguridad SOC. Responde SOLO con la información del contexto proporcionado. 
+NO repitas recomendaciones. Sé conciso y termina tu respuesta con "---FIN---".
+</s>
+<|user|>
 CONTEXTO DE MITRE:
 {contexto}
 
-PREGUNTA DEL ANALISTA:
-{pregunta_usuario}
+PREGUNTA: {pregunta_usuario}
 
-REGLAS:
-1. Si la información no está en el contexto, puedes inferir basada en MITRE, pero indica claramente que es una inferencia.
-2. Usa un tono técnico y formal.
-3.Si la pregunta del analista es general (como pedir lista de tácticas), responde con un listado claro. 
-Si es específica de incidentes, genera el ticket con telemetría y recomendaciones.
-4. Incluye claramente:
-   - Señales de telemetría esperadas.
-   - Técnicas MITRE involucradas.
-   - Recomendaciones prácticas para SOC.
-
-RESPUESTA PROFESIONAL:
+Responde con este formato EXACTO:
+**Técnica MITRE:** [Nombre] ([ID exacto del contexto])
+**Táctica:** [táctica]
+**Descripción breve:** [2 líneas máximo]
+**Telemetría esperada:**
+- [señal 1]
+- [señal 2]
+- [señal 3]
+**Recomendaciones SOC:**
+- [rec 1]
+- [rec 2]
+- [rec 3]
+---FIN---
+</s>
+<|assistant|>
 """
     # Enviar como mensaje de chat
     mensajes = [HumanMessage(content=prompt_final)]
@@ -121,12 +125,12 @@ RESPUESTA PROFESIONAL:
 if __name__ == "__main__":
     print("\n---SISTEMA GANESHA ATT&CK LISTO ---")
     
-    consulta = "¿Cuáles son las principales tácticas de MITRE ATT&CK?"
+    consulta = "Como un atacante puede hacer escalada de privilegios"
     
     try:
         resultado = generar_ticket_mitre(consulta)
         print("\n" + "="*50)
-        print("TICKET GENERADO POR LA IA:")
+        print("TEXTO GENERADO POR LA IA:")
         print("="*50)
         print(resultado)
     except Exception as e:
